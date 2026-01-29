@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>dubaibaibaiya</title>
+
+  <!--// ================================
+  // 1. 네이버 지도 API
+  // ================================ -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=client_id"></script>
+  
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    const map = new naver.maps.Map('map', {
+      center: new naver.maps.LatLng(37.507828, 127.061397),
+      zoom: 16
+    });
+
+    // ================================
+    // 2. PNG 마커 옵션
+    // ================================
+    const markerIcon = {
+      url: "/static/dubai.png",
+      size: new naver.maps.Size(48, 48),
+      scaledSize: new naver.maps.Size(48, 48),
+      anchor: new naver.maps.Point(24, 48)
+    };
+
+    // ================================
+    // 3. FastAPI 데이터 가져오기
+    // ================================
+
+    fetch("http://localhost:8000/api/stores")
+      .then(res => res.json())
+      .then(stores => {
+        stores.forEach(store => {
+          const position = new naver.maps.LatLng(
+            Number(store.lat),
+            Number(store.lng)
+          );
+
+          const marker = new naver.maps.Marker({
+            position: position,
+            map: map,
+            title: store.name,
+            icon: markerIcon
+          });
+
+          // 네이버플레이스로 이동
+          if (store.place_url) {
+            naver.maps.Event.addListener(marker, "click", () => {
+              window.open(store.place_url, "_blank");
+            });
+          }
+
+          map.setCenter(position);
+        });
+      });
+  </script>
+</body>
+</html>
